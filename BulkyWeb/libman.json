@@ -1,0 +1,34 @@
+{
+  "version": "3.0",
+  "defaultProvider": "cdnjs",
+  "libraries": [
+    {
+      "provider": "cdnjs",
+      "library": "bootstrap@5.3.8",
+      "destination": "wwwroot/lib/bootstrap/"
+    },
+    {
+      "provider": "cdnjs",
+      "library": "bootswatch@5.3.8",
+      "destination": "wwwroot/lib/bootswatch/",
+      "files": [
+        "lux/bootstrap.css",
+        "lux/bootstrap.min.css",
+        "lux/bootstrap.min.css.map",
+        "lux/bootstrap.rtl.css",
+        "lux/bootstrap.rtl.min.css",
+        "lux/bootstrap.rtl.min.css.map"
+      ]
+    },
+    {
+      "provider": "cdnjs",
+      "library": "toastr.js@2.1.4",
+      "destination": "wwwroot/lib/toastr.js/"
+    },
+    {
+      "provider": "cdnjs",
+      "library": "bootstrap-icons@1.13.1",
+      "destination": "wwwroot/lib/bootstrap-icons/"
+    }
+  ]
+}

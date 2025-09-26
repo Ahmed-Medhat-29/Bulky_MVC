@@ -1,36 +1,50 @@
-namespace BulkyWeb
+using BulkyWeb.Data;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Serilog;
+
+namespace BulkyWeb;
+
+public class Program
 {
-    public class Program
-    {
-        public static void Main(string[] args)
-        {
-            var builder = WebApplication.CreateBuilder(args);
+	public static void Main(string[] args)
+	{
+		var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
-            builder.Services.AddControllersWithViews();
+		builder.Host.UseSerilog((context, configuration) =>
+			configuration.ReadFrom.Configuration(context.Configuration)
+		);
 
-            var app = builder.Build();
+		builder.Services.AddControllersWithViews();
 
-            // Configure the HTTP request pipeline.
-            if (!app.Environment.IsDevelopment())
-            {
-                app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                app.UseHsts();
-            }
+		builder.Services.AddDbContext<ApplicationDbContext>(o =>
+			o.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-            app.UseHttpsRedirection();
-            app.UseStaticFiles();
+		var app = builder.Build();
 
-            app.UseRouting();
+		if (!app.Environment.IsDevelopment())
+		{
+			app.UseExceptionHandler("/Home/Error");
+			app.UseHsts();
+		}
 
-            app.UseAuthorization();
+		app.UseHttpsRedirection();
 
-            app.MapControllerRoute(
-                name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}");
+		app.UseStaticFiles();
 
-            app.Run();
-        }
-    }
+		app.UseRouting();
+
+		app.UseSerilogRequestLogging();
+
+		app.UseAuthorization();
+
+		app.MapControllerRoute(
+			name: "default",
+			pattern: "{controller=Home}/{action=Index}/{id?}");
+
+		app.Run();
+	}
 }
