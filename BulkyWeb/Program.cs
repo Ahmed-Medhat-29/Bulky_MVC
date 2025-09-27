@@ -1,4 +1,4 @@
-using BulkyWeb.Data;
+using Bulky.DataAccess.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;

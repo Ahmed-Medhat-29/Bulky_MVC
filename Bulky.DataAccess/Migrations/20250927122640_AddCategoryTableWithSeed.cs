@@ -2,10 +2,12 @@
 
 #nullable disable
 
-namespace BulkyWeb.Migrations
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
+namespace Bulky.DataAccess.Migrations
 {
     /// <inheritdoc />
-    public partial class AddCategoryTable : Migration
+    public partial class AddCategoryTableWithSeed : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -22,6 +24,16 @@ namespace BulkyWeb.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Categories", x => x.Id);
+                });
+
+            migrationBuilder.InsertData(
+                table: "Categories",
+                columns: new[] { "Id", "DisplayOrder", "Name" },
+                values: new object[,]
+                {
+                    { 1, 1, "Action" },
+                    { 2, 2, "SciFi" },
+                    { 3, 3, "History" }
                 });
         }
 
