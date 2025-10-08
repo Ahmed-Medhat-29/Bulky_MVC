@@ -1,4 +1,6 @@
 using Bulky.DataAccess.Data;
+using Bulky.DataAccess.Repositories;
+using Bulky.DataAccess.Repositories.Interfaces;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -23,6 +25,9 @@ public class Program
 		builder.Services.AddDbContext<ApplicationDbContext>(o =>
 			o.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+		builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+		builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
 		var app = builder.Build();
 
 		if (!app.Environment.IsDevelopment())
@@ -43,7 +48,7 @@ public class Program
 
 		app.MapControllerRoute(
 			name: "default",
-			pattern: "{controller=Home}/{action=Index}/{id?}");
+			pattern: "{area=Customer}/{controller=Home}/{action=Index}/{id?}");
 
 		app.Run();
 	}
