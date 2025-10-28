@@ -7,49 +7,78 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
+using Microsoft.AspNetCore.Identity;
+using Bulky.Utility;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Bulky.DataAccess.Seeds;
+using System.Threading.Tasks;
 
 namespace BulkyWeb;
 
 public class Program
 {
-	public static void Main(string[] args)
-	{
-		var builder = WebApplication.CreateBuilder(args);
+    public static async Task Main(string[] args)
+    {
+        var builder = WebApplication.CreateBuilder(args);
 
-		builder.Host.UseSerilog((context, configuration) =>
-			configuration.ReadFrom.Configuration(context.Configuration)
-		);
+        builder.Host.UseSerilog((context, configuration) =>
+            configuration.ReadFrom.Configuration(context.Configuration)
+        );
 
-		builder.Services.AddControllersWithViews();
+        builder.Services.AddControllersWithViews();
+        builder.Services.AddRazorPages();
 
-		builder.Services.AddDbContext<ApplicationDbContext>(o =>
-			o.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+        builder.Services.AddDbContext<ApplicationDbContext>(o =>
+            o.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+        
+        builder.Services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
 
-		builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
-		builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+        builder.Services.ConfigureApplicationCookie(options =>
+        {
+            options.LoginPath = "/Identity/Account/Login";
+            options.LogoutPath = "/Identity/Account/Logout";
+            options.AccessDeniedPath = "/Identity/Account/AccessDenied";
+        });
 
-		var app = builder.Build();
+        builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+        builder.Services.AddScoped<IProductRepository, ProductRepository>();
+        builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+        builder.Services.AddScoped<IEmailSender, EmailSender>();
 
-		if (!app.Environment.IsDevelopment())
-		{
-			app.UseExceptionHandler("/Home/Error");
-			app.UseHsts();
-		}
+        var app = builder.Build();
 
-		app.UseHttpsRedirection();
+        if (!app.Environment.IsDevelopment())
+        {
+            app.UseExceptionHandler("/Home/Error");
+            app.UseHsts();
+        }
 
-		app.UseStaticFiles();
 
-		app.UseRouting();
+        app.UseHttpsRedirection();
 
-		app.UseSerilogRequestLogging();
+        app.UseStaticFiles();
 
-		app.UseAuthorization();
+        app.UseRouting();
 
-		app.MapControllerRoute(
-			name: "default",
-			pattern: "{area=Customer}/{controller=Home}/{action=Index}/{id?}");
+        app.UseSerilogRequestLogging();
 
-		app.Run();
-	}
+        app.UseAuthentication();
+
+        app.UseAuthorization();
+
+        await using (var scope = app.Services.CreateAsyncScope())
+        {
+            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+            await new RolesSeeder(roleManager).SeedAsync();
+        }
+
+
+        app.MapRazorPages();
+
+        app.MapControllerRoute(
+            name: "default",
+            pattern: "{area=Customer}/{controller=Home}/{action=Index}/{id?}");
+
+        app.Run();
+    }
 }

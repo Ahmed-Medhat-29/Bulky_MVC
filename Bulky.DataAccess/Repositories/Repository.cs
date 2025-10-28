@@ -10,37 +10,57 @@ namespace Bulky.DataAccess.Repositories;
 
 public class Repository<T> : IRepository<T> where T : class
 {
-	private readonly ApplicationDbContext _context;
-	private readonly DbSet<T> _dbSet;
+    private readonly ApplicationDbContext _context;
+    private readonly DbSet<T> _dbSet;
 
-	public Repository(ApplicationDbContext context)
-	{
-		_context = context;
-		_dbSet = _context.Set<T>();
-	}
+    public Repository(ApplicationDbContext context)
+    {
+        _context = context;
+        _dbSet = _context.Set<T>();
+    }
 
-	public void Add(T entity)
-	{
-		_dbSet.Add(entity);
-	}
+    public void Add(T entity)
+    {
+        _dbSet.Add(entity);
+    }
 
-	public T Get(Expression<Func<T, bool>> filter)
-	{
-		return _dbSet.FirstOrDefault(filter);
-	}
+    public T Get(Expression<Func<T, bool>> filter, string includeProperties = null)
+    {
+        var query = _dbSet.AsQueryable();
+        if (!string.IsNullOrWhiteSpace(includeProperties))
+        {
+            var properties = includeProperties.Split(',', StringSplitOptions.RemoveEmptyEntries);
+            foreach (var property in properties)
+            {
+                query = query.Include(property);
+            }
+        }
 
-	public IEnumerable<T> GetList()
-	{
-		return _dbSet.ToList();
-	}
+        return query.FirstOrDefault(filter);
+    }
 
-	public void Remove(T entity)
-	{
-		_dbSet.Remove(entity);
-	}
+    public IEnumerable<T> GetList(string includeProperties = null)
+    {
+        var query = _dbSet.AsQueryable();
+        if (!string.IsNullOrWhiteSpace(includeProperties))
+        {
+            var properties = includeProperties.Split(',', StringSplitOptions.RemoveEmptyEntries);
+            foreach (var property in properties)
+            {
+                query = query.Include(property);
+            }
+        }
 
-	public void RemoveRange(IEnumerable<T> entities)
-	{
-		_dbSet.RemoveRange(entities);
-	}
+        return query.ToList();
+    }
+
+    public void Remove(T entity)
+    {
+        _dbSet.Remove(entity);
+    }
+
+    public void RemoveRange(IEnumerable<T> entities)
+    {
+        _dbSet.RemoveRange(entities);
+    }
 }
