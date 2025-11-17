@@ -9,14 +9,17 @@ public class UnitOfWork : IUnitOfWork
 
     public ICategoryRepository CategoryRepository { get; private set; }
     public IProductRepository ProductRepository { get; private set; }
+    public ICompanyRepository CompanyRepository { get; private set; }
 
     public UnitOfWork(ApplicationDbContext context,
         ICategoryRepository categoryRepository,
-        IProductRepository productRepository)
+        IProductRepository productRepository,
+        ICompanyRepository companyRepository)
     {
         _context = context;
         CategoryRepository = categoryRepository;
         ProductRepository = productRepository;
+        CompanyRepository = companyRepository;
     }
 
     public void Save()

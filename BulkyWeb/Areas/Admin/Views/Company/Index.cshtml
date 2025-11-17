@@ -1,0 +1,101 @@
+﻿@model List<Company>
+@{
+    ViewData["Title"] = "Company";
+}
+
+<div class="card shadow border-0 mt-4">
+    <div class="card-header bg-secondary bg-gradient ml-0 py-3">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h2 class="text-white py-2">Company List</h2>
+            </div>
+        </div>
+    </div>
+    <div class="card-body p-4">
+        <div class="row pb-3">
+            <div class="col-6">
+            </div>
+            <div class="col-6 text-end">
+                <a asp-controller="Company" asp-action="Upsert" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Create New Company
+                </a>
+            </div>
+        </div>
+
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Address</th>
+                    <th>City</th>
+                    <th>State</th>
+                    <th>Phone Number</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var Company in Model)
+                {
+                    <tr>
+                        <td>@Company.Name</td>
+                        <td>@Company.StreetAddress</td>
+                        <td>@Company.City</td>
+                        <td>@Company.State</td>
+                        <td>@Company.PhoneNumber</td>
+                        <td>
+                            <div class="w-75 btn-group float-end" role="group">
+                                <a asp-controller="Company" asp-action="Upsert" asp-route-id="@Company.Id" class="btn btn-primary mx-2">
+                                    <i class="bi bi-pencil-square"></i> Edit
+                                </a>
+                                <button class="btn btn-danger mx-2"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#deleteModal"
+                                        data-Company-id="@Company.Id"
+                                        data-Company-name="@Company.Name">
+                                    <i class="bi bi-trash-fill"></i> Delete
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+<div class="modal fade" tabindex="-1" id="deleteModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Company</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete <strong id="CompanyName"></strong>?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <form asp-action="Delete" method="post">
+                    <input type="hidden" name="id" id="CompanyId" />
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const deleteModal = document.getElementById('deleteModal');
+        deleteModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+
+            const CompanyId = button.getAttribute('data-Company-id');
+            const CompanyName = button.getAttribute('data-Company-name');
+
+            document.getElementById('CompanyId').value = CompanyId;
+            document.getElementById('CompanyName').textContent = CompanyName;
+        });
+    </script>
+}
