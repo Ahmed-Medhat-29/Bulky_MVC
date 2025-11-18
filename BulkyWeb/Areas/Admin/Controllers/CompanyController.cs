@@ -22,7 +22,7 @@ public class CompanyController : Controller
 
     public IActionResult Index()
     {
-        var companies = _unitOfWork.CompanyRepository.GetList();
+        var companies = _unitOfWork.Company.GetList();
 
         return View(companies);
     }
@@ -35,7 +35,7 @@ public class CompanyController : Controller
             return View(new Company());
         }
 
-        var company = _unitOfWork.CompanyRepository.Get(c => c.Id == id);
+        var company = _unitOfWork.Company.Get(c => c.Id == id);
         if (company == null) return NotFound();
 
         return View(company);
@@ -49,12 +49,12 @@ public class CompanyController : Controller
 
             if (company.Id == 0)
             {
-                _unitOfWork.CompanyRepository.Add(company);
+                _unitOfWork.Company.Add(company);
                 TempData["success"] = "Company created successfully";
             }
             else
             {
-                _unitOfWork.CompanyRepository.Update(company);
+                _unitOfWork.Company.Update(company);
                 TempData["success"] = "Company updated successfully";
             }
 
@@ -70,10 +70,10 @@ public class CompanyController : Controller
     {
         if (id <= 0) return NotFound();
 
-        var company = _unitOfWork.CompanyRepository.Get(c => c.Id == id);
+        var company = _unitOfWork.Company.Get(c => c.Id == id);
         if (company == null) return NotFound();
 
-        _unitOfWork.CompanyRepository.Remove(company);
+        _unitOfWork.Company.Remove(company);
         _unitOfWork.Save();
         TempData["success"] = "Company deleted successfully";
         return RedirectToAction("Index");

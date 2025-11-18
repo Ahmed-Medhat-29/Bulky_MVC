@@ -28,7 +28,7 @@ public class ProductController : Controller
 
     public IActionResult Index()
     {
-        var products = _unitOfWork.ProductRepository.GetList("Category");
+        var products = _unitOfWork.Product.GetList(null, "Category");
 
         return View(products);
     }
@@ -38,7 +38,7 @@ public class ProductController : Controller
     {
         var productVM = new ProductVM
         {
-            CategoryList = _unitOfWork.CategoryRepository.GetList().Select(c => new SelectListItem
+            CategoryList = _unitOfWork.Category.GetList().Select(c => new SelectListItem
             {
                 Text = c.Name,
                 Value = c.Id.ToString()
@@ -51,7 +51,7 @@ public class ProductController : Controller
             return View(productVM);
         }
 
-        var product = _unitOfWork.ProductRepository.Get(c => c.Id == id, "Category");
+        var product = _unitOfWork.Product.Get(c => c.Id == id, "Category");
         if (product == null) return NotFound();
 
         productVM.Product = product;
@@ -89,12 +89,12 @@ public class ProductController : Controller
 
             if (productVM.Product.Id == 0)
             {
-                _unitOfWork.ProductRepository.Add(productVM.Product);
+                _unitOfWork.Product.Add(productVM.Product);
                 TempData["success"] = "Product created successfully";
             }
             else
             {
-                _unitOfWork.ProductRepository.Update(productVM.Product);
+                _unitOfWork.Product.Update(productVM.Product);
                 TempData["success"] = "Product updated successfully";
             }
 
@@ -102,7 +102,7 @@ public class ProductController : Controller
             return RedirectToAction("Index");
         }
 
-        productVM.CategoryList = _unitOfWork.CategoryRepository.GetList().Select(c => new SelectListItem
+        productVM.CategoryList = _unitOfWork.Category.GetList().Select(c => new SelectListItem
         {
             Text = c.Name,
             Value = c.Id.ToString()
@@ -116,7 +116,7 @@ public class ProductController : Controller
     {
         if (id <= 0) return NotFound();
 
-        var product = _unitOfWork.ProductRepository.Get(c => c.Id == id);
+        var product = _unitOfWork.Product.Get(c => c.Id == id);
         if (product == null) return NotFound();
 
         if (!string.IsNullOrWhiteSpace(product.ImageUrl))
@@ -128,7 +128,7 @@ public class ProductController : Controller
             }
         }
 
-        _unitOfWork.ProductRepository.Remove(product);
+        _unitOfWork.Product.Remove(product);
         _unitOfWork.Save();
         TempData["success"] = "Product deleted successfully";
         return RedirectToAction("Index");
