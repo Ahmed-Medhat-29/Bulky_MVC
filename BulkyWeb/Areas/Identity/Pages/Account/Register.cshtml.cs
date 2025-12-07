@@ -160,10 +160,10 @@ namespace BulkyWeb.Areas.Identity.Pages.Account
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
                 user.Name = Input.Name;
                 user.StreetAddress = Input.StreetAddress;
-                user.City = Input.StreetAddress;
-                user.State = Input.StreetAddress;
-                user.PostalCode = Input.StreetAddress;
-                user.PhoneNumber = Input.StreetAddress;
+                user.City = Input.City;
+                user.State = Input.State;
+                user.PostalCode = Input.PostalCode;
+                user.PhoneNumber = Input.PhoneNumber;
 
                 if (Input.Role == SD.Role_Company)
                 {

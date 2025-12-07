@@ -1,0 +1,3 @@
+dotnet ef migrations add {{Migration_Name}} --project Bulky.DataAccess --startup-project BulkyWeb
+
+dotnet ef database update --project Bulky.DataAccess --startup-project BulkyWeb

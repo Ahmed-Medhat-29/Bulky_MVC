@@ -12,6 +12,7 @@ using Bulky.Utility;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Bulky.DataAccess.Seeds;
 using System.Threading.Tasks;
+using Stripe;
 
 namespace BulkyWeb;
 
@@ -30,7 +31,9 @@ public class Program
 
         builder.Services.AddDbContext<ApplicationDbContext>(o =>
             o.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-        
+
+        builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
+
         builder.Services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
 
         builder.Services.ConfigureApplicationCookie(options =>
@@ -45,6 +48,8 @@ public class Program
         builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
         builder.Services.AddScoped<IShoppingCartRepository, ShoppingCartRepository>();
         builder.Services.AddScoped<IApplicationUserRepository, ApplicationUserRepository>();
+        builder.Services.AddScoped<IOrderHeaderRepository, OrderHeaderRepository>();
+        builder.Services.AddScoped<IOrderDetailRepository, OrderDetailRepository>();
         builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
         builder.Services.AddScoped<IEmailSender, EmailSender>();
 
@@ -61,6 +66,8 @@ public class Program
 
         app.UseStaticFiles();
 
+        StripeConfiguration.ApiKey = builder.Configuration.GetSection("Stripe:SecretKey").Get<string>();
+
         app.UseRouting();
 
         app.UseSerilogRequestLogging();
@@ -74,7 +81,6 @@ public class Program
             var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
             await new RolesSeeder(roleManager).SeedAsync();
         }
-
 
         app.MapRazorPages();
 
