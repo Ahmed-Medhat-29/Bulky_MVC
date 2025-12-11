@@ -45,6 +45,13 @@ public class Repository<T> : IRepository<T> where T : class
         return query.FirstOrDefault(filter);
     }
 
+    public int Count(Expression<Func<T, bool>> filter)
+    {
+        var query = _dbSet.AsQueryable();
+
+        return query.Count(filter);
+    }
+
     public IEnumerable<T> GetList(Expression<Func<T, bool>> filter = null, string includeProperties = null)
     {
         var query = _dbSet.AsQueryable();

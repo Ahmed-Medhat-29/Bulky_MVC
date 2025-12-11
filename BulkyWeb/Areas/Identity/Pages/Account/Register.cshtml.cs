@@ -201,6 +201,11 @@ namespace BulkyWeb.Areas.Identity.Pages.Account
                     {
                         return RedirectToPage("RegisterConfirmation", new { email = Input.Email, returnUrl = returnUrl });
                     }
+                    else if (User.IsInRole(SD.Role_Admin))
+                    {
+                        TempData["success"] = "New user created successfully";
+                        return LocalRedirect(returnUrl);
+                    }
                     else
                     {
                         await _signInManager.SignInAsync(user, isPersistent: false);

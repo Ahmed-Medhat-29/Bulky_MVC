@@ -1,7 +1,9 @@
 using Bulky.DataAccess.Repositories.Interfaces;
 using Bulky.Models;
 using Bulky.Models.ViewModels;
+using Bulky.Utility;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
@@ -40,8 +42,8 @@ public class HomeController : Controller
         return View(shoppingCart);
     }
 
-    [Authorize]
     [HttpPost]
+    [Authorize]
     public IActionResult Details(ShoppingCart shoppingCart)
     {
         var claimsIdentity = (ClaimsIdentity)User.Identity;
@@ -56,6 +58,9 @@ public class HomeController : Controller
         }
         else
         {
+            var currentCartCount = _unitOfWork.ShoppingCart.Count(c => c.ApplicationUserId == userId);
+            HttpContext.Session.SetInt32(SD.SessionCart, ++currentCartCount);
+
             _unitOfWork.ShoppingCart.Add(shoppingCart);
         }
 

@@ -10,9 +10,10 @@ using Serilog;
 using Microsoft.AspNetCore.Identity;
 using Bulky.Utility;
 using Microsoft.AspNetCore.Identity.UI.Services;
-using Bulky.DataAccess.Seeds;
 using System.Threading.Tasks;
 using Stripe;
+using System;
+using Bulky.DataAccess.Initializer;
 
 namespace BulkyWeb;
 
@@ -43,6 +44,14 @@ public class Program
             options.AccessDeniedPath = "/Identity/Account/AccessDenied";
         });
 
+        builder.Services.AddDistributedMemoryCache();
+        builder.Services.AddSession(options =>
+        {
+            options.IdleTimeout = TimeSpan.FromMinutes(100);
+            options.Cookie.HttpOnly = true;
+            options.Cookie.IsEssential = true;
+        });
+
         builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
         builder.Services.AddScoped<IProductRepository, ProductRepository>();
         builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
@@ -52,6 +61,8 @@ public class Program
         builder.Services.AddScoped<IOrderDetailRepository, OrderDetailRepository>();
         builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
         builder.Services.AddScoped<IEmailSender, EmailSender>();
+
+        builder.Services.AddScoped<IDbInitializer, DbInitializer>();
 
         var app = builder.Build();
 
@@ -76,10 +87,12 @@ public class Program
 
         app.UseAuthorization();
 
-        await using (var scope = app.Services.CreateAsyncScope())
+        app.UseSession();
+
+        using (var scope = app.Services.CreateScope())
         {
-            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-            await new RolesSeeder(roleManager).SeedAsync();
+            var dbInitializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
+            await dbInitializer.InitializeAsync();
         }
 
         app.MapRazorPages();
